@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "name": "campo-saas-web",
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "env": {
+    "NODE_ENV": "production",
+    "APP_MODE": "web"
+  },
+  "build": {
+    "env": {
+      "APP_MODE": "web"
+    }
+  }
+}

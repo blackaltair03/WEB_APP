@@ -1,0 +1,491 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Montserrat', sans-serif;
+
+  /* Manual de Identidad — Estado de Hidalgo */
+  /* Colores Primarios */
+  --guinda: #621132;
+  --guinda-dark: #3d0b20;
+  --dorado: #b38e5d;
+  --dorado-dark: #7d5f30;
+  --blanco: #ffffff;
+
+  /* Tema Claro (60-30-10) */
+  --background: 0 0% 100%;
+  --foreground: 322 50% 20%;
+  --card: 0 0% 100%;
+  --card-foreground: 322 50% 20%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 322 50% 20%;
+
+  /* Primary: Guinda */
+  --primary: 322 50% 36%;
+  --primary-foreground: 0 0% 100%;
+
+  /* Secondary: Dorado */
+  --secondary: 30 40% 60%;
+  --secondary-foreground: 0 0% 100%;
+
+  --muted: 0 0% 97%;
+  --muted-foreground: 0 0% 40%;
+  --accent: 30 40% 75%;
+  --accent-foreground: 322 50% 20%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 90%;
+  --input: 0 0% 95%;
+  --ring: 322 50% 36%;
+
+  /* Charts */
+  --chart-1: 322 50% 36%;
+  --chart-2: 30 40% 60%;
+  --chart-3: 200 70% 44%;
+  --chart-4: 280 60% 50%;
+  --chart-5: 0 72% 51%;
+
+  /* Sidebar — Guinda */
+  --sidebar-background: 322 50% 20%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-primary: 30 40% 60%;
+  --sidebar-primary-foreground: 322 50% 20%;
+  --sidebar-accent: 322 50% 15%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 322 50% 25%;
+  --sidebar-ring: 30 40% 60%;
+
+  --radius: 0.625rem;
+}
+
+.dark {
+  --background: 120 20% 6%;
+  --foreground: 120 10% 95%;
+  --card: 120 15% 9%;
+  --card-foreground: 120 10% 95%;
+  --popover: 120 15% 9%;
+  --popover-foreground: 120 10% 95%;
+  --primary: 120 52% 55%;
+  --primary-foreground: 120 40% 5%;
+  --secondary: 34 55% 50%;
+  --secondary-foreground: 34 40% 5%;
+  --muted: 120 12% 14%;
+  --muted-foreground: 120 8% 56%;
+  --accent: 120 25% 16%;
+  --accent-foreground: 120 52% 65%;
+  --destructive: 0 62% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 120 15% 16%;
+  --input: 120 15% 16%;
+  --ring: 120 52% 55%;
+  --sidebar-background: 120 30% 5%;
+  --sidebar-foreground: 120 10% 90%;
+  --sidebar-primary: 120 52% 55%;
+  --sidebar-primary-foreground: 120 30% 5%;
+  --sidebar-accent: 120 20% 12%;
+  --sidebar-accent-foreground: 120 10% 90%;
+  --sidebar-border: 120 20% 10%;
+  --sidebar-ring: 120 52% 55%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-display), 'Montserrat', system-ui, sans-serif;
+  font-feature-settings: "rlig" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: hsl(var(--muted)); }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+
+/* Sidebar texture */
+.sidebar-bg {
+  background: var(--guinda);
+  background-image: 
+    radial-gradient(ellipse at 20% 50%, rgb(98 17 50 / 0.8) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 10%, rgb(61 11 32 / 0.6) 0%, transparent 50%);
+}
+
+/* Card hover lift */
+.card-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgb(98 17 50 / 0.12);
+}
+
+/* Stat card — según manual */
+.stat-card {
+  @apply bg-white border-l-4 border-guinda-700;
+}
+.stat-card .stat-number {
+  @apply font-bold text-guinda-700 font-display;
+}
+.stat-card .stat-icon {
+  @apply text-dorado-600;
+}
+
+/* Stat number animation */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.stat-value {
+  animation: countUp 0.5s ease-out forwards;
+}
+
+/* Page transitions */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: fadeSlideIn 0.35s ease-out forwards;
+}
+
+/* Badge variants — según manual */
+.badge-activo      { @apply bg-green-100 text-green-700 border border-green-200; }
+.badge-pendiente   { @apply bg-yellow-100 text-amber-700 border border-yellow-200; }
+.badge-error       { @apply bg-red-100 text-red-700 border border-red-200; }
+.badge-sincronizado { @apply bg-blue-100 text-blue-700 border border-blue-200; }
+.badge-neutral     { @apply bg-muted text-muted-foreground border border-border; }
+
+/* Button variants */
+.btn-primary {
+  @apply bg-guinda-700 text-white hover:bg-guinda-800 font-display font-semibold transition-colors;
+}
+.btn-secondary {
+  @apply border-2 border-guinda-700 text-guinda-700 hover:bg-guinda-700 hover:text-white font-display font-semibold transition-colors;
+}
+.btn-cta {
+  @apply bg-dorado-600 text-white hover:bg-dorado-700 font-display font-semibold transition-colors;
+}
+
+/* Status dots */
+.status-dot {
+  @apply inline-block w-2 h-2 rounded-full;
+}
+.status-dot.active    { @apply bg-green-500; }
+.status-dot.pendiente { @apply bg-amber-400; }
+.status-dot.inactivo  { @apply bg-slate-400; }
+.status-dot.error     { @apply bg-red-500; }
+
+/* Table styling */
+.table-header {
+  @apply bg-pink-50 text-guinda-900 font-display font-semibold;
+}
+.table-row-hover:hover {
+  background: rgb(255 245 247 / 0.6);
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, var(--guinda), var(--dorado));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass card */
+.glass {
+  background: hsl(var(--card) / 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--border) / 0.6);
+}
+
+/* SIDEBAR — Aplicaciones de los colores */
+/* Usar: bg-guinda-700 text-white para sidebar */
+
+/* BOTONES — Variantes */
+/* Primario (Guinda): btn-primary */
+/* Secundario (Borde Guinda): btn-secondary */
+/* CTA/Dorado: btn-cta */
+
+/* BADGES — Estados */
+/* Activo (Verde): badge-activo */
+/* Pendiente (Amarillo): badge-pendiente */
+/* Error/Bloqueado (Rojo): badge-error */  
+/* Sincronizado (Azul): badge-sincronizado */
+
+/* CARDS STATS */
+/* Usa: stat-card para borde izq guinda + stat-number para número guinda + stat-icon para ícono dorado */
+
+/* TABLE HEADER */
+/* Usa: table-header para bg #fff5f7 + texto guinda */
+/* ============================================================================
+   LOGIN PAGE STYLES
+   ============================================================================ */
+
+.login-container {
+  @apply min-h-screen flex bg-white;
+}
+
+/* LEFT PANEL — Branding & Hero */
+.login-left {
+  @apply hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden;
+  background: linear-gradient(135deg, #621132 0%, #3d0b20 50%, #2d0817 100%);
+}
+
+/* Decorative elements */
+.login-left::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  top: -200px;
+  right: -150px;
+}
+
+.login-left::after {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(179, 142, 93, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  bottom: -100px;
+  left: -50px;
+  filter: blur(40px);
+}
+
+/* Logo section */
+.login-brand {
+  @apply relative z-10;
+}
+
+.logo {
+  @apply flex items-center gap-3 mb-8;
+}
+
+.logo-text {
+  @apply text-white font-bold text-2xl tracking-wider font-display;
+}
+
+/* Hero section */
+.login-hero {
+  @apply relative z-10 flex-1 flex flex-col justify-center mb-12;
+}
+
+.login-hero h1 {
+  @apply text-5xl font-bold text-white leading-tight mb-6 font-display;
+}
+
+.login-hero p {
+  @apply text-lg text-white/80 leading-relaxed max-w-md;
+}
+
+/* Footer — left panel */
+.login-footer {
+  @apply relative z-10;
+}
+
+.login-footer p {
+  @apply text-sm text-white/60;
+}
+
+/* RIGHT PANEL — Form */
+.login-right {
+  @apply flex-1 flex items-center justify-center p-8 bg-gray-50;
+}
+
+.login-form-container {
+  @apply w-full max-w-xl;
+}
+
+/* Header */
+.login-header {
+  @apply mb-8;
+}
+
+.login-header h2 {
+  @apply text-3xl font-bold text-guinda-900 font-display;
+}
+
+.login-header p {
+  @apply text-gray-600 text-sm mt-2;
+}
+
+/* Form */
+.login-form {
+  @apply space-y-5 mb-8;
+}
+
+/* Form group */
+.form-group {
+  @apply space-y-2;
+}
+
+.form-label {
+  @apply block text-sm font-semibold text-guinda-900 font-display;
+}
+
+/* Input wrapper with icon */
+.input-with-icon {
+  @apply relative flex items-center;
+}
+
+.input-icon {
+  @apply absolute left-3 text-gray-400 pointer-events-none;
+}
+
+.form-input {
+  @apply w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-guinda-700 focus:ring-2 focus:ring-guinda-700/10 transition-colors bg-white text-gray-900 placeholder-gray-400;
+}
+
+.toggle-password {
+  @apply absolute right-3 text-gray-400 hover:text-gray-600 transition-colors;
+}
+
+/* Form options */
+.form-options {
+  @apply flex justify-end;
+}
+
+.forgot-password {
+  @apply text-sm text-guinda-700 font-medium hover:text-guinda-800 transition-colors;
+}
+
+/* Full-width button */
+.btn-full {
+  @apply w-full py-2.5 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* Demo access section */
+.demo-access {
+  @apply py-6 border-t border-b border-gray-200 mb-6;
+}
+
+.demo-access p {
+  @apply text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3;
+}
+
+.demo-buttons {
+  @apply flex gap-3;
+}
+
+.demo-btn {
+  @apply flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg border-2 font-semibold text-sm transition-all;
+}
+
+.demo-btn.coord {
+  @apply border-guinda-700 text-guinda-700 hover:bg-guinda-50;
+}
+
+.demo-btn.admin {
+  @apply border-dorado-600 text-dorado-600 hover:bg-amber-50;
+}
+
+.demo-btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Help section */
+.login-help {
+  @apply text-center space-y-4;
+}
+
+.help-links {
+  @apply flex items-center justify-center gap-6;
+}
+
+.help-link {
+  @apply text-sm text-guinda-700 font-medium hover:text-guinda-800 transition-colors flex items-center gap-1;
+}
+
+.security-badge {
+  @apply inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-medium;
+}
+
+.copyright {
+  @apply text-xs text-gray-500;
+}
+
+/* Mobile adjustments */
+@media (max-width: 1024px) {
+  .login-container {
+    @apply flex-col;
+  }
+
+  .login-left {
+    @apply flex lg:w-full p-8;
+    min-height: 0;
+  }
+
+  .login-right {
+    @apply min-h-screen items-start pt-8;
+  }
+
+  .login-form-container {
+    @apply max-w-md;
+  }
+
+  .login-header h2 {
+    @apply text-2xl;
+  }
+}
+
+@media (max-width: 640px) {
+  .login-right {
+    @apply p-4;
+  }
+
+  .login-form-container {
+    @apply w-full;
+  }
+
+  .login-header h2 {
+    @apply text-xl;
+  }
+
+  .demo-buttons {
+    @apply flex-col;
+  }
+
+  .help-links {
+    @apply flex-col gap-3;
+  }
+}
+
+/* Animaciones para modales */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out;
+}

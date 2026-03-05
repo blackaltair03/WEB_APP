@@ -1,0 +1,49 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filtersCard {
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  padding: 1rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.tableCard {
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.paginationCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.paginationInfo {
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.paginationActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .paginationCard {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}

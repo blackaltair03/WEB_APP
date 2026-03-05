@@ -1,0 +1,43 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build-next",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"run",
+				"build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "build-next",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"run",
+				"build"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "clean-build",
+			"type": "shell",
+			"command": "pnpm run clean && pnpm run build",
+			"isBackground": false
+		},
+		{
+			"label": "tsc-check",
+			"type": "shell",
+			"command": "pnpm exec tsc --noEmit",
+			"isBackground": false
+		},
+		{
+			"label": "tsc-check-2",
+			"type": "shell",
+			"command": "pnpm exec tsc --noEmit --pretty false",
+			"isBackground": false
+		}
+	]
+}

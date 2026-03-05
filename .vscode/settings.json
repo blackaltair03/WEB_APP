@@ -1,0 +1,12 @@
+{
+  "css.lint.unknownAtRules": "ignore",
+  "[css]": {
+    "editor.suggest.insertMode": "replace"
+  },
+  "css.customData": [
+    "./.vscode/tailwind.css.json"
+],
+"cSpell.words": [
+    "Asignaciones"
+]
+}
