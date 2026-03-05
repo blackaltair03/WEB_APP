@@ -45,6 +45,32 @@ export default function UsuariosClient({ usuarios, total, currentPage, limit }: 
     window.location.href = `/admin/usuarios?${params.toString()}`;
   };
 
+  // Activar/Desactivar usuario
+  const toggleUsuario = async (id: number, actualActivo: boolean) => {
+    const accion = actualActivo ? "desactivar" : "activar";
+    if (!confirm(`¿Estás seguro de ${accion} este usuario?`)) return;
+
+    try {
+      const response = await fetch(`/api/usuarios/${id}/toggle`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => null);
+        error(err?.message ?? `No se pudo ${accion} el usuario`);
+        return;
+      }
+
+      success(
+        actualActivo ? "Usuario desactivado" : "Usuario activado",
+        { description: `El usuario ha sido ${actualActivo ? "desactivado" : "activado"} correctamente` }
+      );
+      window.location.reload();
+    } catch {
+      error("Error de red", { description: "No se pudo conectar con el servidor" });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const payload = {
@@ -240,10 +266,19 @@ export default function UsuariosClient({ usuarios, total, currentPage, limit }: 
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                      <button className="text-guinda-700 hover:text-guinda-900 hover:underline">
+                      <button 
+                        onClick={() => {
+                          // TODO: Implementar edición
+                          alert("Función de edición en desarrollo");
+                        }}
+                        className="text-guinda-700 hover:text-guinda-900 hover:underline"
+                      >
                         Editar
                       </button>
-                      <button className="text-red-600 hover:text-red-800 hover:underline">
+                      <button 
+                        onClick={() => toggleUsuario(usuario.id_usuario, usuario.activo)}
+                        className="text-red-600 hover:text-red-800 hover:underline"
+                      >
                         {usuario.activo ? "Desactivar" : "Activar"}
                       </button>
                     </td>
