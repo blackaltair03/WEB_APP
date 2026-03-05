@@ -35,7 +35,7 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <head>
         {/* Security Meta Tags */}
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
       </head>
