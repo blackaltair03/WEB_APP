@@ -5,16 +5,24 @@ import { z } from "zod";
  */
 
 // Password requirements:
-// - At least 8 characters
+// - At least 10 characters (increased from 8)
 // - At least one uppercase letter
 // - At least one lowercase letter
 // - At least one number
+// - At least one special character
 const passwordRequirements = z
   .string()
-  .min(8, "La contraseña debe tener al menos 8 caracteres")
+  .min(10, "La contraseña debe tener al menos 10 caracteres")
   .regex(/[A-Z]/, "Debe contener al menos una letra mayúscula")
   .regex(/[a-z]/, "Debe contener al menos una letra minúscula")
-  .regex(/[0-9]/, "Debe contener al menos un número");
+  .regex(/[0-9]/, "Debe contener al menos un número")
+  .regex(/[!@#$%^&*]/, "Debe contener al menos un carácter especial (!@#$%^&*)");
+
+// Reset password - same security requirements as regular passwords
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Token requerido"),
+  nueva_password: passwordRequirements, // Reuse same requirements for consistency
+});
 
 export const createUsuarioSchema = z.object({
   nombre_completo: z

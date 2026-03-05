@@ -1,4 +1,9 @@
 import { Resend } from "resend";
+import { escapeHtml } from "./sanitize";
+import { z } from "zod";
+
+// Email validation schema
+const emailSchema = z.string().email("Email inválido");
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 const FROM = process.env.EMAIL_FROM!;
@@ -18,11 +23,19 @@ export async function sendPasswordResetEmail(params: {
   nombre: string;
   token: string;
 }) {
+  // Validate email before processing
+  const validatedEmailResult = emailSchema.safeParse(params.email);
+  if (!validatedEmailResult.success) {
+    console.error("Invalid email format:", params.email);
+    throw new Error("Email inválido");
+  }
+  const validatedEmail = validatedEmailResult.data;
   const resetUrl = `${APP_URL}/reset-password/${params.token}`;
+  const safeNombre = escapeHtml(params.nombre);
 
   await resend.emails.send({
     from: FROM,
-    to: params.email,
+    to: validatedEmail,
     subject: "Recuperación de contraseña — SADERH",
     html: `<!DOCTYPE html><html><body style="${bodyStyle}">
       <div style="${cardStyle}">
@@ -35,7 +48,7 @@ export async function sendPasswordResetEmail(params: {
         </div>
         <div style="padding:32px;">
           <p style="color:#111827;font-size:15px;margin:0 0 12px;">
-            Hola, <strong>${params.nombre}</strong>
+            Hola, <strong>${safeNombre}</strong>
           </p>
           <p style="color:#4b5563;font-size:14px;line-height:1.6;">
             Recibimos una solicitud para restablecer tu contraseña.
@@ -71,9 +84,19 @@ export async function sendWelcomeAdminEmail(params: {
   nombre: string;
   passwordTemporal: string;
 }) {
+  // Validate email before processing
+  const validatedEmailResult = emailSchema.safeParse(params.email);
+  if (!validatedEmailResult.success) {
+    console.error("Invalid email format:", params.email);
+    throw new Error("Email inválido");
+  }
+  const validatedEmail = validatedEmailResult.data;
+  const safeNombre = escapeHtml(params.nombre);
+  const safeEmail = escapeHtml(params.email);
+
   await resend.emails.send({
     from: FROM,
-    to: params.email,
+    to: validatedEmail,
     subject: "Cuenta de administrador creada — SADERH",
     html: `<!DOCTYPE html><html><body style="${bodyStyle}">
       <div style="${cardStyle}">
@@ -88,7 +111,7 @@ export async function sendWelcomeAdminEmail(params: {
         </div>
         <div style="padding:32px;">
           <p style="color:#111827;font-size:15px;margin:0 0 12px;">
-            Hola, <strong>${params.nombre}</strong>
+            Hola, <strong>${safeNombre}</strong>
           </p>
           <p style="color:#4b5563;font-size:14px;line-height:1.6;">
             Tu cuenta de <strong>Super Administrador</strong> ha sido creada en SADERH.
@@ -96,7 +119,7 @@ export async function sendWelcomeAdminEmail(params: {
           <div style="background:#fff5f7;border:1px solid #f3c8d5;
                       border-radius:6px;padding:16px 20px;margin:20px 0;">
             <p style="margin:0 0 8px;color:#4b5563;font-size:13px;">
-              <strong>Email:</strong> ${params.email}
+              <strong>Email:</strong> ${safeEmail}
             </p>
             <p style="margin:0;color:#4b5563;font-size:13px;">
               <strong>Contraseña temporal:</strong>

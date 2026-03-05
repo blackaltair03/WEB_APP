@@ -1,8 +1,5 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { db } from "./db";
-import { usuarios } from "./schema";
-import { eq } from "drizzle-orm";
 
 export type UserRole = "SUPER_ADMIN" | "COORDINADOR" | "TECNICO";
 
@@ -40,7 +37,7 @@ export async function verifyWebToken(token: string): Promise<SessionPayload | nu
 export async function signAppToken(payload: SessionPayload): Promise<string> {
   return await new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("30d")
+    .setExpirationTime("7d") // Reduced from 30 days for security
     .setIssuedAt()
     .sign(APP_SECRET);
 }
@@ -68,8 +65,8 @@ export async function setSession(payload: SessionPayload): Promise<void> {
   cookieStore.set("campo_session", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 60 * 60 * 8, // 8 hours
+    sameSite: "strict",
+    maxAge: 60 * 60 * 24 * 7, // 7 days - matches JWT expiration
     path: "/",
   });
 }
@@ -79,14 +76,12 @@ export async function clearSession(): Promise<void> {
   cookieStore.delete("campo_session");
 }
 
-// ─── Get user from DB (fresh data) ───────────────────────────────────────────
+// ─── Get user from external API ───────────────────────────────────────────────
 export async function getFullUser(id_usuario: number) {
-  const [user] = await db
-    .select()
-    .from(usuarios)
-    .where(eq(usuarios.id_usuario, id_usuario))
-    .limit(1);
-  return user ?? null;
+  // When using external API, user data comes from the API
+  // This function would need to call the external API
+  // For now, return null - the session data should contain user info
+  return null;
 }
 
 // ─── Auth token from request header (for API routes used by mobile) ──────────

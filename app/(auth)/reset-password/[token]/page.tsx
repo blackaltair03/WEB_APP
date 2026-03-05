@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use } from "react";
+import { resetPasswordSchema } from "@/lib/validations/usuario";
+import { isValidToken } from "@/lib/sanitize";
 
 export default function ResetPasswordPage({
   params,
@@ -16,13 +19,51 @@ export default function ResetPasswordPage({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [isTokenValid, setIsTokenValid] = useState<boolean | null>(null);
+  const [validatingToken, setValidatingToken] = useState(true);
+
+  // Validar token con el servidor al cargar la página
+  useEffect(() => {
+    (async () => {
+      if (!token || !isValidToken(token)) {
+        setError("Enlace de recuperación inválido o expirado");
+        setIsTokenValid(false);
+        setValidatingToken(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/validate-reset-token?token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+        
+        if (!res.ok || !data.valid) {
+          setError(data.error || "Enlace de recuperación inválido o expirado");
+          setIsTokenValid(false);
+        } else {
+          setIsTokenValid(true);
+        }
+      } catch {
+        setError("Error al validar el enlace. Intenta de nuevo.");
+        setIsTokenValid(false);
+      } finally {
+        setValidatingToken(false);
+      }
+    })();
+  }, [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (password.length < 8) {
-      setError("La contraseña debe tener mínimo 8 caracteres");
+    if (!password) {
+      setError("La contraseña es requerida");
+      return;
+    }
+
+    // Validar usando el esquema del servidor para mantener consistencia
+    const validation = resetPasswordSchema.safeParse({ token, nueva_password: password });
+    if (!validation.success) {
+      setError(validation.error.errors[0].message);
       return;
     }
 
@@ -59,6 +100,59 @@ export default function ResetPasswordPage({
       setLoading(false);
     }
   };
+
+  // Mostrar pantalla de carga mientras se valida el token
+  if (validatingToken) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-8">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-guinda-200 border-t-guinda-600 rounded-full mx-auto mb-4 animate-spin"></div>
+            <p className="text-gray-600">Validando enlace de recuperación...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar error si el token es inválido
+  if (isTokenValid === false) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-8">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <svg
+                className="w-8 h-8 text-red-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Enlace Inválido
+            </h2>
+            <p className="text-gray-600 mb-6">
+              El enlace de recuperación es inválido o ha expirado. Por favor, solicita uno nuevo.
+            </p>
+            <Link
+              href="/forgot-password"
+              className="inline-block px-6 py-3 bg-guinda-700 hover:bg-guinda-800 text-white font-semibold rounded-lg transition"
+            >
+              Solicitar Nuevo Enlace
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (success) {
     return (
@@ -132,7 +226,7 @@ export default function ResetPasswordPage({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-guinda-500"
-              placeholder="Mínimo 8 caracteres"
+              placeholder="Mínimo 10 caracteres, mayúscula, minúscula, número y especial"
               required
               autoFocus
             />
@@ -141,7 +235,7 @@ export default function ResetPasswordPage({
                 <div className="flex items-center gap-2 text-xs">
                   <div
                     className={`h-1 flex-1 rounded ${
-                      password.length < 8
+                      password.length < 10
                         ? "bg-red-300"
                         : password.length < 12
                         ? "bg-yellow-300"
@@ -151,15 +245,15 @@ export default function ResetPasswordPage({
                 </div>
                 <p
                   className={`text-xs mt-1 ${
-                    password.length < 8
+                    password.length < 10
                       ? "text-red-600"
                       : password.length < 12
                       ? "text-yellow-600"
                       : "text-green-600"
                   }`}
                 >
-                  {password.length < 8
-                    ? "Débil - Mínimo 8 caracteres"
+                  {password.length < 10
+                    ? "Débil - Mínimo 10 caracteres"
                     : password.length < 12
                     ? "Aceptable - Usa 12+ caracteres"
                     : "Segura"}
