@@ -17,6 +17,84 @@ const cardStyle = `max-width:520px; margin:0 auto; background:#fff;
                      border-radius:8px; overflow:hidden;
                      box-shadow:0 2px 8px rgba(0,0,0,0.08);`;
 
+// ── Email genérico ─────────────────────────────────────────────────────────
+export async function sendEmail(params: {
+  to: string;
+  subject: string;
+  html: string;
+}) {
+  const validatedEmailResult = emailSchema.safeParse(params.to);
+  if (!validatedEmailResult.success) {
+    console.error("Invalid email format:", params.to);
+    throw new Error("Email inválido");
+  }
+
+  await resend.emails.send({
+    from: FROM,
+    to: validatedEmailResult.data,
+    subject: params.subject,
+    html: params.html,
+  });
+}
+
+// ── Email de verificación de código ───────────────────────────────────────
+export async function sendVerificationCodeEmail(params: {
+  email: string;
+  code: string;
+}) {
+  const validatedEmailResult = emailSchema.safeParse(params.email);
+  if (!validatedEmailResult.success) {
+    console.error("Invalid email format:", params.email);
+    throw new Error("Email inválido");
+  }
+  const validatedEmail = validatedEmailResult.data;
+
+  await resend.emails.send({
+    from: FROM,
+    to: validatedEmail,
+    subject: "🔐 Código de verificación - SADERH",
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <body style="${bodyStyle}">
+          <div style="${cardStyle}">
+            <div style="${headerStyle}">
+              <p style="color:#b38e5d;font-size:11px;margin:0 0 4px;
+                        letter-spacing:2px;text-transform:uppercase;">
+                Gobierno del Estado de Hidalgo
+              </p>
+              <h1 style="color:#fff;margin:0;font-size:20px;font-weight:600;">SADERH</h1>
+            </div>
+            <div style="padding:32px;">
+              <p style="color:#111827;font-size:15px;margin:0 0 12px;">
+                Hola,
+              </p>
+              <p style="color:#4b5563;font-size:14px;line-height:1.6;">
+                Has solicitado iniciar sesión en SADERH. Usa el siguiente código de verificación:
+              </p>
+              <div style="background:#fff5f7;border:2px dashed #621132;
+                          border-radius:8px;padding:24px;margin:24px 0;text-align:center;">
+                <span style="font-size:36px;font-weight:bold;color:#621132;letter-spacing:8px;">
+                  ${params.code}
+                </span>
+              </div>
+              <p style="color:#9ca3af;font-size:12px;line-height:1.6;">
+                Este código expira en 5 minutos.<br>
+                Si no solicitaste este código, ignora este correo.
+              </p>
+            </div>
+            <div style="${footerStyle}">
+              <p style="color:#9ca3af;font-size:11px;margin:0;">
+                SADERH · Secretaría de Agricultura de Hidalgo
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  });
+}
+
 // ── Reset de contraseña por email ──────────────────────────────────────
 export async function sendPasswordResetEmail(params: {
   email: string;
