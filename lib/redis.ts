@@ -5,10 +5,23 @@
 
 import { Redis } from "@upstash/redis";
 
-// Inicializar cliente de Redis
-export const redis = Redis.fromEnv({
-  // @ts-ignore - Las variables de entorno ya están configuradas
-});
+let redisClient: Redis | null = null;
+
+function getRedisClient(): Redis {
+  if (redisClient) return redisClient;
+
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!url || !token) {
+    throw new Error(
+      "Missing Upstash Redis credentials. Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN."
+    );
+  }
+
+  redisClient = new Redis({ url, token });
+  return redisClient;
+}
 
 /**
  * Genera un código aleatorio de 5 dígitos
@@ -28,6 +41,7 @@ export async function storeVerificationCode(
   code: string,
   expiresIn: number = 300 // 5 minutos
 ): Promise<void> {
+  const redis = getRedisClient();
   const key = `verification:${email}`;
   await redis.set(key, code, { ex: expiresIn });
 }
@@ -37,6 +51,7 @@ export async function storeVerificationCode(
  * @returns true si el código es válido, false si no existe o no coincide
  */
 export async function verifyCode(email: string, code: string): Promise<boolean> {
+  const redis = getRedisClient();
   const key = `verification:${email}`;
   const storedCode = await redis.get<string>(key);
   
@@ -57,6 +72,7 @@ export async function verifyCode(email: string, code: string): Promise<boolean> 
  * Obtiene el número de intentos fallidos para un email
  */
 export async function getFailedAttempts(email: string): Promise<number> {
+  const redis = getRedisClient();
   const key = `failed_attempts:${email}`;
   const attempts = await redis.get<number>(key);
   return attempts ?? 0;
@@ -66,6 +82,7 @@ export async function getFailedAttempts(email: string): Promise<number> {
  * Incrementa el contador de intentos fallidos
  */
 export async function incrementFailedAttempts(email: string): Promise<number> {
+  const redis = getRedisClient();
   const key = `failed_attempts:${email}`;
   const attempts = await redis.incr(key);
   
@@ -79,6 +96,7 @@ export async function incrementFailedAttempts(email: string): Promise<number> {
  * Resetea el contador de intentos fallidos
  */
 export async function resetFailedAttempts(email: string): Promise<void> {
+  const redis = getRedisClient();
   const key = `failed_attempts:${email}`;
   await redis.del(key);
 }
@@ -91,6 +109,7 @@ export async function storeSessionToken(
   userId: number,
   expiresIn: number = 86400 // 24 horas
 ): Promise<void> {
+  const redis = getRedisClient();
   const key = `session:${token}`;
   await redis.set(key, userId.toString(), { ex: expiresIn });
 }
@@ -99,6 +118,7 @@ export async function storeSessionToken(
  * Obtiene el userId de una sesión
  */
 export async function getSessionUserId(token: string): Promise<number | null> {
+  const redis = getRedisClient();
   const key = `session:${token}`;
   const userId = await redis.get<string>(key);
   return userId ? parseInt(userId, 10) : null;
@@ -108,6 +128,7 @@ export async function getSessionUserId(token: string): Promise<number | null> {
  * Elimina una sesión
  */
 export async function deleteSession(token: string): Promise<void> {
+  const redis = getRedisClient();
   const key = `session:${token}`;
   await redis.del(key);
 }

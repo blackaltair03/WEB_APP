@@ -1,6 +1,5 @@
-import type { Config } from "tailwindcss";
-
-const config: Config = {
+/** @type {import('tailwindcss').Config} */
+const config = {
   darkMode: ["class"],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -18,27 +17,27 @@ const config: Config = {
         // Manual de Identidad — Estado de Hidalgo
         // Colores Primarios
         guinda: {
-          50:  "#f8f4f7",
+          50: "#f8f4f7",
           100: "#f0e9f0",
           200: "#e0d3e0",
           300: "#c7afc9",
           400: "#a67fa8",
           500: "#8b5a8c",
           600: "#7a4675",
-          700: "#621132",  // Primary — Guinda
-          800: "#3d0b20",  // Dark variant
+          700: "#621132", // Primary — Guinda
+          800: "#3d0b20", // Dark variant
           900: "#2a0719",
           950: "#1a040e",
         },
         dorado: {
-          50:  "#fef8f4",
+          50: "#fef8f4",
           100: "#fdf1e8",
           200: "#fae3d0",
           300: "#f5cdb2",
           400: "#e8ac7f",
           500: "#d99160",
           600: "#c4772f",
-          700: "#b38e5d",  // Secondary — Dorado
+          700: "#b38e5d", // Secondary — Dorado
           800: "#8b6a45",
           900: "#6d5438",
           950: "#5a441d",
@@ -132,4 +131,5 @@ const config: Config = {
   },
   plugins: [require("tailwindcss-animate")],
 };
-export default config;
+
+module.exports = config;

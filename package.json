@@ -45,6 +45,7 @@
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.9.0",
     "clsx": "^2.1.1",
+    "critters": "^0.0.25",
     "date-fns": "^4.1.0",
     "drizzle-kit": "^0.31.9",
     "drizzle-orm": "^0.45.1",

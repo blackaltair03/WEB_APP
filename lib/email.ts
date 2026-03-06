@@ -5,9 +5,35 @@ import { z } from "zod";
 // Email validation schema
 const emailSchema = z.string().email("Email inválido");
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
-const FROM = process.env.EMAIL_FROM!;
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL!;
+let resendClient: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (resendClient) return resendClient;
+
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error("Missing RESEND_API_KEY.");
+  }
+
+  resendClient = new Resend(apiKey);
+  return resendClient;
+}
+
+function getEmailFrom(): string {
+  const from = process.env.EMAIL_FROM;
+  if (!from) {
+    throw new Error("Missing EMAIL_FROM.");
+  }
+  return from;
+}
+
+function getAppUrl(): string {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!appUrl) {
+    throw new Error("Missing NEXT_PUBLIC_APP_URL.");
+  }
+  return appUrl;
+}
 
 // Estilos compartidos de email (colores institucionales)
 const headerStyle = `background:#621132; padding:28px 32px;`;
@@ -23,6 +49,9 @@ export async function sendEmail(params: {
   subject: string;
   html: string;
 }) {
+  const resend = getResendClient();
+  const from = getEmailFrom();
+
   const validatedEmailResult = emailSchema.safeParse(params.to);
   if (!validatedEmailResult.success) {
     console.error("Invalid email format:", params.to);
@@ -30,7 +59,7 @@ export async function sendEmail(params: {
   }
 
   await resend.emails.send({
-    from: FROM,
+    from,
     to: validatedEmailResult.data,
     subject: params.subject,
     html: params.html,
@@ -42,6 +71,9 @@ export async function sendVerificationCodeEmail(params: {
   email: string;
   code: string;
 }) {
+  const resend = getResendClient();
+  const from = getEmailFrom();
+
   const validatedEmailResult = emailSchema.safeParse(params.email);
   if (!validatedEmailResult.success) {
     console.error("Invalid email format:", params.email);
@@ -50,7 +82,7 @@ export async function sendVerificationCodeEmail(params: {
   const validatedEmail = validatedEmailResult.data;
 
   await resend.emails.send({
-    from: FROM,
+    from,
     to: validatedEmail,
     subject: "🔐 Código de verificación - SADERH",
     html: `
@@ -101,6 +133,9 @@ export async function sendPasswordResetEmail(params: {
   nombre: string;
   token: string;
 }) {
+  const resend = getResendClient();
+  const from = getEmailFrom();
+
   // Validate email before processing
   const validatedEmailResult = emailSchema.safeParse(params.email);
   if (!validatedEmailResult.success) {
@@ -108,11 +143,11 @@ export async function sendPasswordResetEmail(params: {
     throw new Error("Email inválido");
   }
   const validatedEmail = validatedEmailResult.data;
-  const resetUrl = `${APP_URL}/reset-password/${params.token}`;
+  const resetUrl = `${getAppUrl()}/reset-password/${params.token}`;
   const safeNombre = escapeHtml(params.nombre);
 
   await resend.emails.send({
-    from: FROM,
+    from,
     to: validatedEmail,
     subject: "Recuperación de contraseña — SADERH",
     html: `<!DOCTYPE html><html><body style="${bodyStyle}">
@@ -162,6 +197,9 @@ export async function sendWelcomeAdminEmail(params: {
   nombre: string;
   passwordTemporal: string;
 }) {
+  const resend = getResendClient();
+  const from = getEmailFrom();
+
   // Validate email before processing
   const validatedEmailResult = emailSchema.safeParse(params.email);
   if (!validatedEmailResult.success) {
@@ -173,7 +211,7 @@ export async function sendWelcomeAdminEmail(params: {
   const safeEmail = escapeHtml(params.email);
 
   await resend.emails.send({
-    from: FROM,
+    from,
     to: validatedEmail,
     subject: "Cuenta de administrador creada — SADERH",
     html: `<!DOCTYPE html><html><body style="${bodyStyle}">
