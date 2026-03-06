@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyWebToken } from "./lib/auth";
 
-const PUBLIC_PATHS = ["/login"];
+const PUBLIC_PATHS = ["/login", "/forgot-password", "/reset-password"];
 const STATIC_PATHS = ["/_next/static", "/_next/image", "/favicon.ico", "/logo", "/icons"];
 
 const ROLE_PATHS: Record<string, string[]> = {
@@ -22,6 +22,13 @@ const BLOCKED_PATHS: Record<string, string[]> = {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // API routes must be handled by their own route-level auth/validation.
+  // If middleware redirects these requests, client fetch() calls fail as
+  // "connection error" when trying to parse the redirected HTML response.
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
 
   // Skip static assets (fastest check first)
   if (STATIC_PATHS.some((p) => pathname.startsWith(p))) {

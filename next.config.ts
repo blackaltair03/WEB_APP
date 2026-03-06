@@ -46,6 +46,15 @@ const nextConfig: NextConfig = {
     if (appMode === "web" && externalApiUrl) {
       return {
         beforeFiles: [
+          // Keep local auth/reset endpoints in this Next.js app.
+          {
+            source: "/api/auth/:path*",
+            destination: "/api/auth/:path*",
+          },
+          {
+            source: "/api/validate-reset-token",
+            destination: "/api/validate-reset-token",
+          },
           {
             source: "/api/:path*",
             destination: `${externalApiUrl}/api/:path*`,
