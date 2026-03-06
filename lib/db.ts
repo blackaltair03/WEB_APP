@@ -1,21 +1,30 @@
-import { neon, Pool } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
+
+let dbPool: Pool | null = null;
 
 function createDb() {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
-    throw new Error("No database connection string was provided to `neon()`. Perhaps an environment variable has not been set?");
+    throw new Error("No database connection string was provided. Perhaps DATABASE_URL is missing.");
   }
 
-  // Usar Pool para conexiones más eficientes
-  const sql = neon(databaseUrl, {
-    fetchOptions: {
-      cache: "no-store",
-    },
-  });
+  // Compatible with Supabase/Neon/managed Postgres providers.
+  const useSsl =
+    /sslmode=require/i.test(databaseUrl) ||
+    databaseUrl.includes(".supabase.co") ||
+    databaseUrl.includes(".neon.tech");
 
-  return drizzle(sql, {
+  if (!dbPool) {
+    dbPool = new Pool({
+      connectionString: databaseUrl,
+      ssl: useSsl ? { rejectUnauthorized: false } : undefined,
+      max: 10,
+    });
+  }
+
+  return drizzle(dbPool, {
     schema,
     logger: process.env.NODE_ENV === "development",
   });

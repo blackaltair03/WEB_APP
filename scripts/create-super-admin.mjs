@@ -69,7 +69,8 @@ async function main() {
     INSERT INTO usuarios (
       nombre_completo,
       email,
-      password_hash,
+      codigo_acceso,
+      codigo_acceso_hash,
       rol,
       activo,
       puede_registrar_beneficiarios,
@@ -79,6 +80,7 @@ async function main() {
     VALUES (
       ${nombre},
       ${email},
+      ${password},
       ${passwordHash},
       'SUPER_ADMIN',
       true,

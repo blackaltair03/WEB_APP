@@ -8,6 +8,20 @@ import { signWebToken } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json(
+        { error: "Configuración incompleta: falta DATABASE_URL" },
+        { status: 503 }
+      );
+    }
+
+    if (!process.env.JWT_SECRET) {
+      return NextResponse.json(
+        { error: "Configuración incompleta: falta JWT_SECRET" },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
     const email = String(body?.email ?? "").toLowerCase().trim();
     const password = String(body?.password ?? "");
@@ -46,7 +60,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validPassword = await bcrypt.compare(password, user.password_hash);
+    if (!user.password_hash) {
+      console.error("Login error: usuario sin password_hash", { email });
+      return NextResponse.json(
+        { error: "Credenciales inválidas" },
+        { status: 401 }
+      );
+    }
+
+    let validPassword = false;
+    try {
+      validPassword = await bcrypt.compare(password, user.password_hash);
+    } catch (error) {
+      console.error("Login error: password_hash inválido", { email, error });
+      return NextResponse.json(
+        { error: "Credenciales inválidas" },
+        { status: 401 }
+      );
+    }
+
     if (!validPassword) {
       return NextResponse.json(
         { error: "Credenciales inválidas" },
@@ -88,4 +120,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
