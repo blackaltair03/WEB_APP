@@ -6,6 +6,8 @@ import { notificaciones } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { count } from "drizzle-orm";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({
   children,
 }: {

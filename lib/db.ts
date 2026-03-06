@@ -2,19 +2,46 @@ import { neon, Pool } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
 
-// Usar Pool para conexiones más eficientes
-const sql = neon(process.env.DATABASE_URL!, {
-  fetchOptions: {
-    cache: 'no-store',
+function createDb() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error("No database connection string was provided to `neon()`. Perhaps an environment variable has not been set?");
+  }
+
+  // Usar Pool para conexiones más eficientes
+  const sql = neon(databaseUrl, {
+    fetchOptions: {
+      cache: "no-store",
+    },
+  });
+
+  return drizzle(sql, {
+    schema,
+    logger: process.env.NODE_ENV === "development",
+  });
+}
+
+type Database = ReturnType<typeof createDb>;
+
+let dbInstance: Database | null = null;
+
+function getDbInstance(): Database {
+  if (!dbInstance) {
+    dbInstance = createDb();
+  }
+  return dbInstance;
+}
+
+// Proxy para evitar evaluar la conexión en import-time durante build.
+export const db: Database = new Proxy({} as Database, {
+  get(_target, property, receiver) {
+    const instance = getDbInstance();
+    const value = Reflect.get(instance as object, property, receiver);
+    return typeof value === "function" ? value.bind(instance) : value;
   },
 });
 
-export const db = drizzle(sql, { 
-  schema,
-  logger: process.env.NODE_ENV === 'development',
-});
-
-export type DB = typeof db;
+export type DB = Database;
 
 // Cache simple en memoria para datos estáticos (expira en 5 minutos)
 interface CacheEntry<T> {
